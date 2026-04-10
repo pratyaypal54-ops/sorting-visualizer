@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sorting Visualizer</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: Arial, sans-serif;
+  background: #0d1117;
+  color: #e6edf3;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #39d353;
+  letter-spacing: 1px;
+}
+
+/* Controls Bar */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 18px;
+}
+
+.controls label {
+  font-size: 13px;
+  color: #7d8590;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.controls select,
+.controls button {
+  font-size: 13px;
+  padding: 7px 14px;
+  border-radius: 6px;
+  border: 1px solid #30363d;
+  background: #0d1117;
+  color: #e6edf3;
+  cursor: pointer;
+}
+
+.controls select:focus {
+  outline: 2px solid #58a6ff;
+  border-color: #58a6ff;
+}
+
+#btn-start {
+  background: #39d353;
+  color: #000;
+  border-color: #39d353;
+  font-weight: bold;
+  min-width: 100px;
+}
+#btn-start:hover:not(:disabled) { background: #4ae064; }
+#btn-start:disabled { opacity: 0.4; cursor: not-allowed; }
+
+#btn-reset {
+  background: #161b22;
+  border-color: #30363d;
+}
+#btn-reset:hover:not(:disabled) { background: #21262d; }
+#btn-reset:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.slider-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.slider-group span {
+  font-size: 13px;
+  color: #7d8590;
+  min-width: 28px;
+}
+input[type="range"] {
+  cursor: pointer;
+  accent-color: #58a6ff;
+  width: 100px;
+}
+
+/* Stats */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.stat-card {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 12px 16px;
+  text-align: center;
+}
+.stat-card .num { font-size: 24px; font-weight: bold; }
+.stat-card .lbl { font-size: 11px; color: #7d8590; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.blue   { color: #58a6ff; }
+.orange { color: #f0883e; }
+.green  { color: #39d353; }
+
+/* Visualization Area */
+#viz-area {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 10px;
+  padding: 16px;
+  height: 300px;
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.bar {
+  flex: 1;
+  border-radius: 3px 3px 0 0;
+  min-width: 4px;
+  transition: height 0.15s ease, background-color 0.1s;
+}
+.bar.idle    { background: #2d5a2d; }
+.bar.compare { background: #c0392b; }
+.bar.swap    { background: #e67e22; }
+.bar.sorted  { background: #39d353; }
+.bar.pivot   { background: #bc8cff; }
+
+/* Legend */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+.leg {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #7d8590;
+}
+.leg-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+/* Status */
+#status-bar {
+  font-size: 12px;
+  color: #7d8590;
+  min-height: 18px;
+}
+
+/* Responsive */
+@media (max-width: 540px) {
+  .stats { grid-template-columns: 1fr 1fr; }
+  .controls { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<h1>Sorting Visualizer</h1>
+
+<!-- Controls -->
+<div class="controls">
+  <div>
+    <label>Algorithm</label>
+    <select id="algo">
+      <option value="bubble">Bubble Sort</option>
+      <option value="selection">Selection Sort</option>
+      <option value="insertion">Insertion Sort</option>
+      <option value="merge">Merge Sort</option>
+      <option value="quick">Quick Sort</option>
+    </select>
+  </div>
+
+  <div>
+    <label>Speed</label>
+    <select id="speed">
+      <option value="250">Slow</option>
+      <option value="80" selected>Normal</option>
+      <option value="15">Fast</option>
+    </select>
+  </div>
+
+  <div>
+    <label>Elements</label>
+    <div class="slider-group">
+      <input type="range" id="size" min="6" max="40" value="20" step="1">
+      <span id="size-val">20</span>
+    </div>
+  </div>
+
+  <button id="btn-reset">⟳ New Array</button>
+  <button id="btn-start">▶ Start</button>
+</div>
+
+<!-- Stats -->
+<div class="stats">
+  <div class="stat-card">
+    <div class="num blue" id="s-cmp">0</div>
+    <div class="lbl">Comparisons</div>
+  </div>
+  <div class="stat-card">
+    <div class="num orange" id="s-swp">0</div>
+    <div class="lbl">Swaps / Writes</div>
+  </div>
+  <div class="stat-card">
+    <div class="num green" id="s-time">0.00s</div>
+    <div class="lbl">Time Elapsed</div>
+  </div>
+</div>
+
+<!-- Bar Chart -->
+<div id="viz-area"></div>
+
+<!-- Legend -->
+<div class="legend">
+  <div class="leg"><div class="leg-dot" style="background:#2d5a2d"></div>Idle</div>
+  <div class="leg"><div class="leg-dot" style="background:#c0392b"></div>Comparing</div>
+  <div class="leg"><div class="leg-dot" style="background:#e67e22"></div>Swapping</div>
+  <div class="leg"><div class="leg-dot" style="background:#39d353"></div>Sorted</div>
+  <div class="leg"><div class="leg-dot" style="background:#bc8cff"></div>Pivot</div>
+</div>
+
+<!-- Status Message -->
+<div id="status-bar">Ready — press "New Array" then "Start"</div>
+
+<script>
+// ── Global Variables ──────────────────────────────────────────────────────────
+let arr = [];          // the array being sorted
+let stopFlag = false;  // set to true when user clicks Stop
+let running = false;   // is a sort currently running?
+let cmp = 0;           // comparison counter
+let swp = 0;           // swap/write counter
+let startTime = 0;
+let timerID = null;
+
+// ── DOM Elements ──────────────────────────────────────────────────────────────
+const vizArea   = document.getElementById("viz-area");
+const sCmp      = document.getElementById("s-cmp");
+const sSwp      = document.getElementById("s-swp");
+const sTime     = document.getElementById("s-time");
+const statusBar = document.getElementById("status-bar");
+const btnStart  = document.getElementById("btn-start");
+const btnReset  = document.getElementById("btn-reset");
+const sizeInput = document.getElementById("size");
+const sizeVal   = document.getElementById("size-val");
+const speedSel  = document.getElementById("speed");
+const algoSel   = document.getElementById("algo");
+
+// ── Helper: get delay in milliseconds ────────────────────────────────────────
+function getDelay() {
+  return parseInt(speedSel.value);
+}
+
+// ── Reset stat counters to zero ───────────────────────────────────────────────
+function resetStats() {
+  cmp = 0; swp = 0;
+  sCmp.textContent = "0";
+  sSwp.textContent = "0";
+  sTime.textContent = "0.00s";
+}
+
+// ── Update stat display ───────────────────────────────────────────────────────
+function updateStats() {
+  sCmp.textContent = cmp.toLocaleString();
+  sSwp.textContent = swp.toLocaleString();
+}
+
+// ── Generate a new random array ───────────────────────────────────────────────
+function generateArray() {
+  const n = parseInt(sizeInput.value);
+  arr = [];
+  for (let i = 0; i < n; i++) {
+    arr.push(Math.floor(Math.random() * 85) + 10); // values 10–94
+  }
+  drawBars({});
+  resetStats();
+  statusBar.textContent = "Ready — " + n + " elements generated. Press Start.";
+}
+
+// ── Draw bars on screen ───────────────────────────────────────────────────────
+// states = { index: "compare" | "swap" | "sorted" | "pivot" | "idle" }
+function drawBars(states) {
+  const n = arr.length;
+  const maxVal = Math.max(...arr, 1);
+  const areaH = vizArea.clientHeight - 10;
+
+  // Rebuild bars only if count changed
+  if (vizArea.children.length !== n) {
+    vizArea.innerHTML = "";
+    for (let i = 0; i < n; i++) {
+      const b = document.createElement("div");
+      b.className = "bar idle";
+      b.id = "bar" + i;
+      vizArea.appendChild(b);
+    }
+  }
+
+  // Update height and color of each bar
+  for (let i = 0; i < n; i++) {
+    const b = document.getElementById("bar" + i);
+    if (!b) continue;
+    const h = Math.max(4, Math.floor((arr[i] / maxVal) * areaH));
+    b.style.height = h + "px";
+    b.className = "bar " + (states[i] || "idle");
+  }
+}
+
+// ── Sleep: pause execution for delay ms ───────────────────────────────────────
+// Throws "STOP" if user clicked Stop
+function sleep() {
+  if (stopFlag) throw "STOP";
+  return new Promise(resolve => setTimeout(resolve, getDelay()));
+}
+
+// ── Mark state and redraw ─────────────────────────────────────────────────────
+async function mark(states) {
+  if (stopFlag) throw "STOP";
+  drawBars(states);
+  updateStats();
+  await sleep();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SORTING ALGORITHMS
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── 1. Bubble Sort ────────────────────────────────────────────────────────────
+// Compare adjacent elements, swap if out of order. Repeat n times.
+async function bubbleSort() {
+  const n = arr.length;
+  const st = {};
+
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n - i - 1; j++) {
+
+      // Compare arr[j] and arr[j+1]
+      cmp++;
+      st[j] = "compare";
+      st[j + 1] = "compare";
+      await mark(st);
+
+      if (arr[j] > arr[j + 1]) {
+        // Swap them
+        [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+        swp++;
+        st[j] = "swap";
+        st[j + 1] = "swap";
+        await mark(st);
+      }
+
+      delete st[j];
+      delete st[j + 1];
+    }
+    // Largest element is now in its correct position
+    st[n - i - 1] = "sorted";
+  }
+
+  return st;
+}
+
+// ── 2. Selection Sort ─────────────────────────────────────────────────────────
+// Find the minimum element in the unsorted part, place it at the front.
+async function selectionSort() {
+  const n = arr.length;
+  const st = {};
+
+  for (let i = 0; i < n; i++) {
+    let minIdx = i;
+    st[minIdx] = "pivot"; // mark current minimum
+
+    for (let j = i + 1; j < n; j++) {
+      cmp++;
+      st[j] = "compare";
+      await mark(st);
+
+      if (arr[j] < arr[minIdx]) {
+        if (minIdx !== i) delete st[minIdx];
+        minIdx = j;
+        st[minIdx] = "pivot";
+      } else {
+        delete st[j];
+      }
+    }
+
+    // Swap minimum to correct position
+    if (minIdx !== i) {
+      [arr[i], arr[minIdx]] = [arr[minIdx], arr[i]];
+      swp++;
+      delete st[minIdx];
+      st[i] = "swap";
+      await mark(st);
+    }
+
+    st[i] = "sorted";
+    await mark(st);
+  }
+
+  return st;
+}
+
+// ── 3. Insertion Sort ─────────────────────────────────────────────────────────
+// Pick each element and insert it in the correct position in the sorted part.
+async function insertionSort() {
+  const n = arr.length;
+  const st = { 0: "sorted" };
+
+  for (let i = 1; i < n; i++) {
+    let key = arr[i];
+    let j = i - 1;
+
+    st[i] = "compare";
+    await mark(st);
+
+    // Shift elements that are greater than key one position right
+    while (j >= 0 && arr[j] > key) {
+      cmp++;
+      arr[j + 1] = arr[j];
+      swp++;
+      st[j + 1] = "swap";
+      st[j] = "compare";
+      await mark(st);
+      delete st[j + 1];
+      j--;
+    }
+
+    // Place key in its correct position
+    arr[j + 1] = key;
+    st[j + 1] = "sorted";
+    delete st[i];
+    await mark(st);
+  }
+
+  return st;
+}
+
+// ── 4. Merge Sort ─────────────────────────────────────────────────────────────
+// Divide array into halves, sort each half, then merge them back together.
+async function mergeSort(left, right, st) {
+  if (left >= right) return;
+
+  const mid = Math.floor((left + right) / 2);
+  await mergeSort(left, mid, st);       // sort left half
+  await mergeSort(mid + 1, right, st);  // sort right half
+  await mergeParts(left, mid, right, st); // merge both halves
+}
+
+async function mergeParts(left, mid, right, st) {
+  const leftArr = arr.slice(left, mid + 1);
+  const rightArr = arr.slice(mid + 1, right + 1);
+  let i = 0, j = 0, k = left;
+
+  while (i < leftArr.length && j < rightArr.length) {
+    cmp++;
+    st[k] = "compare";
+    await mark(st);
+
+    if (leftArr[i] <= rightArr[j]) {
+      arr[k] = leftArr[i++];
+    } else {
+      arr[k] = rightArr[j++];
+    }
+    swp++;
+    st[k] = "sorted";
+    k++;
+  }
+
+  // Copy remaining elements
+  while (i < leftArr.length) {
+    arr[k] = leftArr[i++];
+    swp++;
+    st[k] = "sorted";
+    await mark(st);
+    k++;
+  }
+  while (j < rightArr.length) {
+    arr[k] = rightArr[j++];
+    swp++;
+    st[k] = "sorted";
+    await mark(st);
+    k++;
+  }
+}
+
+// ── 5. Quick Sort ─────────────────────────────────────────────────────────────
+// Pick a pivot, partition array around it, recursively sort each side.
+async function quickSort(lo, hi, st) {
+  if (lo >= hi) {
+    if (lo >= 0 && lo < arr.length) st[lo] = "sorted";
+    return;
+  }
+
+  const pivotIdx = await partition(lo, hi, st);
+  st[pivotIdx] = "sorted";
+  await mark(st);
+
+  await quickSort(lo, pivotIdx - 1, st);
+  await quickSort(pivotIdx + 1, hi, st);
+}
+
+async function partition(lo, hi, st) {
+  const pivot = arr[hi];
+  st[hi] = "pivot"; // highlight pivot
+  let i = lo - 1;
+
+  for (let j = lo; j < hi; j++) {
+    cmp++;
+    st[j] = "compare";
+    await mark(st);
+
+    if (arr[j] < pivot) {
+      i++;
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+      swp++;
+      st[i] = "swap";
+      st[j] = "swap";
+      await mark(st);
+      delete st[i];
+    }
+    delete st[j];
+  }
+
+  // Place pivot in correct position
+  [arr[i + 1], arr[hi]] = [arr[hi], arr[i + 1]];
+  swp++;
+  delete st[hi];
+  return i + 1;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BUTTON HANDLERS
+// ─────────────────────────────────────────────────────────────────────────────
+
+btnStart.onclick = async () => {
+  // If already running, act as Stop button
+  if (running) {
+    stopFlag = true;
+    return;
+  }
+
+  // Generate array if empty
+  if (arr.length === 0) generateArray();
+
+  // Setup
+  stopFlag = false;
+  running = true;
+  btnStart.textContent = "■ Stop";
+  btnReset.disabled = true;
+  sizeInput.disabled = true;
+  algoSel.disabled = true;
+  resetStats();
+
+  // Start timer
+  startTime = Date.now();
+  timerID = setInterval(() => {
+    sTime.textContent = ((Date.now() - startTime) / 1000).toFixed(2) + "s";
+  }, 100);
+
+  const key = algoSel.value;
+  const name = algoSel.options[algoSel.selectedIndex].text;
+  statusBar.textContent = "Running " + name + "...";
+
+  try {
+    let finalStates = {};
+
+    if (key === "bubble")    finalStates = await bubbleSort();
+    if (key === "selection") finalStates = await selectionSort();
+    if (key === "insertion") finalStates = await insertionSort();
+    if (key === "merge") {
+      const s = {};
+      await mergeSort(0, arr.length - 1, s);
+      finalStates = s;
+    }
+    if (key === "quick") {
+      const s = {};
+      await quickSort(0, arr.length - 1, s);
+      finalStates = s;
+    }
+
+    // Mark all bars as sorted at the end
+    const allSorted = {};
+    for (let i = 0; i < arr.length; i++) allSorted[i] = "sorted";
+    drawBars(allSorted);
+
+    clearInterval(timerID);
+    const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
+    statusBar.textContent =
+      "Done! " + name + " finished in " + elapsed + "s | " +
+      cmp.toLocaleString() + " comparisons | " +
+      swp.toLocaleString() + " swaps";
+
+  } catch (e) {
+    // User clicked Stop
+    clearInterval(timerID);
+    drawBars({});
+    statusBar.textContent = "Stopped by user.";
+
+  } finally {
+    // Restore controls
+    running = false;
+    stopFlag = false;
+    btnStart.textContent = "▶ Start";
+    btnReset.disabled = false;
+    sizeInput.disabled = false;
+    algoSel.disabled = false;
+  }
+};
+
+btnReset.onclick = () => {
+  if (!running) generateArray();
+};
+
+sizeInput.oninput = () => {
+  sizeVal.textContent = sizeInput.value;
+  if (!running) generateArray();
+};
+
+// ── Init: generate array on page load ─────────────────────────────────────────
+generateArray();
+</script>
+</body>
+</html>
