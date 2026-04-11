@@ -21,4 +21,5 @@ Just open `index.html` in any browser. No installation needed.
 [Click here to view](https://yourusername.github.io/sorting-visualizer)
 
 ## Tech Stack
-HTML | CSS | JavaScript (Vanilla)
+HTML | CSS | JavaScript
+
