@@ -18,7 +18,7 @@ A web-based sorting algorithm visualizer that animates how different sorting alg
 Just open `index.html` in any browser. No installation needed.
 
 ## Live Demo
-[Click here to view](https://yourusername.github.io/sorting-visualizer)
+[Click here to view](https://pratyaypal54-ops.github.io/sorting-visualizer)
 
 ## Tech Stack
 HTML | CSS | JavaScript
