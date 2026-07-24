@@ -18,9 +18,24 @@ body {
 h1 {
   text-align: center;
   font-size: 24px;
-  margin-bottom: 20px;
+  margin-bottom: 4px;
   color: #39d353;
   letter-spacing: 1px;
+}
+
+.subtitle {
+  text-align: center;
+  font-size: 12px;
+  color: #7d8590;
+  margin-bottom: 20px;
+}
+.subtitle kbd {
+  background: #21262d;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 11px;
+  color: #7d8590;
 }
 
 /* Controls Bar */
@@ -28,19 +43,21 @@ h1 {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  align-items: center;
+  align-items: flex-end;
   background: #161b22;
   border: 1px solid #30363d;
   border-radius: 10px;
   padding: 14px 18px;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 }
 
 .controls label {
-  font-size: 13px;
+  font-size: 12px;
   color: #7d8590;
   margin-bottom: 4px;
   display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .controls select,
@@ -54,17 +71,14 @@ h1 {
   cursor: pointer;
 }
 
-.controls select:focus {
-  outline: 2px solid #58a6ff;
-  border-color: #58a6ff;
-}
+.controls select:focus { outline: 2px solid #58a6ff; border-color: #58a6ff; }
 
 #btn-start {
   background: #39d353;
   color: #000;
   border-color: #39d353;
   font-weight: bold;
-  min-width: 100px;
+  min-width: 110px;
 }
 #btn-start:hover:not(:disabled) { background: #4ae064; }
 #btn-start:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -76,6 +90,14 @@ h1 {
 #btn-reset:hover:not(:disabled) { background: #21262d; }
 #btn-reset:disabled { opacity: 0.4; cursor: not-allowed; }
 
+#btn-sound {
+  background: #161b22;
+  border-color: #30363d;
+  min-width: 40px;
+  padding: 7px 10px;
+}
+#btn-sound:hover { background: #21262d; }
+
 .slider-group {
   display: flex;
   align-items: center;
@@ -84,20 +106,65 @@ h1 {
 .slider-group span {
   font-size: 13px;
   color: #7d8590;
-  min-width: 28px;
+  min-width: 24px;
+  text-align: right;
 }
 input[type="range"] {
   cursor: pointer;
   accent-color: #58a6ff;
-  width: 100px;
+  width: 90px;
 }
+
+/* Algorithm Info Card */
+#algo-info {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 14px;
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+#algo-info .algo-name {
+  font-size: 15px;
+  font-weight: bold;
+  color: #58a6ff;
+  min-width: 130px;
+}
+.complexity-group {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.cx-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.cx-label {
+  font-size: 10px;
+  color: #7d8590;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.cx-val {
+  font-size: 13px;
+  font-weight: bold;
+  font-family: monospace;
+}
+.cx-val.best  { color: #39d353; }
+.cx-val.avg   { color: #f0883e; }
+.cx-val.worst { color: #ff7b72; }
+.cx-val.space { color: #bc8cff; }
 
 /* Stats */
 .stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 }
 .stat-card {
   background: #161b22;
@@ -118,19 +185,36 @@ input[type="range"] {
   background: #161b22;
   border: 1px solid #30363d;
   border-radius: 10px;
-  padding: 16px;
+  padding: 16px 16px 0 16px;
   height: 300px;
   display: flex;
   align-items: flex-end;
   gap: 3px;
   overflow: hidden;
   margin-bottom: 14px;
+  position: relative;
+}
+
+.bar-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  min-width: 4px;
+}
+
+.bar-label {
+  font-size: 9px;
+  color: #7d8590;
+  margin-bottom: 2px;
+  display: none;
 }
 
 .bar {
-  flex: 1;
+  width: 100%;
   border-radius: 3px 3px 0 0;
-  min-width: 4px;
   transition: height 0.15s ease, background-color 0.1s;
 }
 .bar.idle    { background: #2d5a2d; }
@@ -138,6 +222,9 @@ input[type="range"] {
 .bar.swap    { background: #e67e22; }
 .bar.sorted  { background: #39d353; }
 .bar.pivot   { background: #bc8cff; }
+
+/* show labels on small arrays */
+.show-labels .bar-label { display: block; }
 
 /* Legend */
 .legend {
@@ -167,15 +254,17 @@ input[type="range"] {
 }
 
 /* Responsive */
-@media (max-width: 540px) {
+@media (max-width: 600px) {
   .stats { grid-template-columns: 1fr 1fr; }
   .controls { flex-direction: column; align-items: flex-start; }
+  #algo-info { flex-direction: column; gap: 12px; }
 }
 </style>
 </head>
 <body>
 
 <h1>Sorting Visualizer</h1>
+<p class="subtitle">Press <kbd>Space</kbd> to start / stop</p>
 
 <!-- Controls -->
 <div class="controls">
@@ -191,11 +280,21 @@ input[type="range"] {
   </div>
 
   <div>
+    <label>Array Type</label>
+    <select id="arr-type">
+      <option value="random">Random</option>
+      <option value="reversed">Reversed</option>
+      <option value="nearly">Nearly Sorted</option>
+      <option value="few">Few Unique</option>
+    </select>
+  </div>
+
+  <div>
     <label>Speed</label>
     <select id="speed">
-      <option value="250">Slow</option>
+      <option value="300">Slow</option>
       <option value="80" selected>Normal</option>
-      <option value="15">Fast</option>
+      <option value="10">Fast</option>
     </select>
   </div>
 
@@ -207,8 +306,36 @@ input[type="range"] {
     </div>
   </div>
 
+  <button id="btn-sound" title="Toggle sound">🔇</button>
   <button id="btn-reset">⟳ New Array</button>
   <button id="btn-start">▶ Start</button>
+</div>
+
+<!-- Algorithm Info Card -->
+<div id="algo-info">
+  <div class="algo-name" id="ai-name">Bubble Sort</div>
+  <div class="complexity-group">
+    <div class="cx-item">
+      <span class="cx-label">Best</span>
+      <span class="cx-val best" id="ai-best">O(n)</span>
+    </div>
+    <div class="cx-item">
+      <span class="cx-label">Average</span>
+      <span class="cx-val avg" id="ai-avg">O(n²)</span>
+    </div>
+    <div class="cx-item">
+      <span class="cx-label">Worst</span>
+      <span class="cx-val worst" id="ai-worst">O(n²)</span>
+    </div>
+    <div class="cx-item">
+      <span class="cx-label">Space</span>
+      <span class="cx-val space" id="ai-space">O(1)</span>
+    </div>
+    <div class="cx-item">
+      <span class="cx-label">Stable</span>
+      <span class="cx-val" id="ai-stable" style="color:#58a6ff">Yes</span>
+    </div>
+  </div>
 </div>
 
 <!-- Stats -->
@@ -239,20 +366,28 @@ input[type="range"] {
   <div class="leg"><div class="leg-dot" style="background:#bc8cff"></div>Pivot</div>
 </div>
 
-<!-- Status Message -->
 <div id="status-bar">Ready — press "New Array" then "Start"</div>
 
 <script>
-// ── Global Variables ──────────────────────────────────────────────────────────
-let arr = [];          // the array being sorted
-let stopFlag = false;  // set to true when user clicks Stop
-let running = false;   // is a sort currently running?
-let cmp = 0;           // comparison counter
-let swp = 0;           // swap/write counter
-let startTime = 0;
-let timerID = null;
+// ── Algorithm metadata ────────────────────────────────────────────────────────
+const ALGO_INFO = {
+  bubble:    { name: "Bubble Sort",    best: "O(n)",       avg: "O(n²)",      worst: "O(n²)",      space: "O(1)",    stable: "Yes" },
+  selection: { name: "Selection Sort", best: "O(n²)",      avg: "O(n²)",      worst: "O(n²)",      space: "O(1)",    stable: "No"  },
+  insertion: { name: "Insertion Sort", best: "O(n)",       avg: "O(n²)",      worst: "O(n²)",      space: "O(1)",    stable: "Yes" },
+  merge:     { name: "Merge Sort",     best: "O(n log n)", avg: "O(n log n)", worst: "O(n log n)", space: "O(n)",    stable: "Yes" },
+  quick:     { name: "Quick Sort",     best: "O(n log n)", avg: "O(n log n)", worst: "O(n²)",      space: "O(log n)",stable: "No"  },
+};
 
-// ── DOM Elements ──────────────────────────────────────────────────────────────
+// ── Global state ──────────────────────────────────────────────────────────────
+let arr = [];
+let stopFlag = false;
+let running  = false;
+let cmp = 0, swp = 0;
+let startTime = 0, timerID = null;
+let soundEnabled = false;
+let audioCtx = null;
+
+// ── DOM refs ──────────────────────────────────────────────────────────────────
 const vizArea   = document.getElementById("viz-area");
 const sCmp      = document.getElementById("s-cmp");
 const sSwp      = document.getElementById("s-swp");
@@ -260,17 +395,54 @@ const sTime     = document.getElementById("s-time");
 const statusBar = document.getElementById("status-bar");
 const btnStart  = document.getElementById("btn-start");
 const btnReset  = document.getElementById("btn-reset");
+const btnSound  = document.getElementById("btn-sound");
 const sizeInput = document.getElementById("size");
 const sizeVal   = document.getElementById("size-val");
 const speedSel  = document.getElementById("speed");
 const algoSel   = document.getElementById("algo");
+const arrType   = document.getElementById("arr-type");
 
-// ── Helper: get delay in milliseconds ────────────────────────────────────────
-function getDelay() {
-  return parseInt(speedSel.value);
+// ── Sound: Web Audio API beep ─────────────────────────────────────────────────
+function playBeep(freq, type = "sine", dur = 0.04) {
+  if (!soundEnabled) return;
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const osc  = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+  gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+  osc.start(audioCtx.currentTime);
+  osc.stop(audioCtx.currentTime + dur);
 }
 
-// ── Reset stat counters to zero ───────────────────────────────────────────────
+btnSound.onclick = () => {
+  soundEnabled = !soundEnabled;
+  btnSound.textContent = soundEnabled ? "🔊" : "🔇";
+  if (soundEnabled && !audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+};
+
+// ── Update algorithm info card ────────────────────────────────────────────────
+function updateAlgoInfo() {
+  const info = ALGO_INFO[algoSel.value];
+  document.getElementById("ai-name").textContent  = info.name;
+  document.getElementById("ai-best").textContent  = info.best;
+  document.getElementById("ai-avg").textContent   = info.avg;
+  document.getElementById("ai-worst").textContent = info.worst;
+  document.getElementById("ai-space").textContent = info.space;
+  const stableEl = document.getElementById("ai-stable");
+  stableEl.textContent = info.stable;
+  stableEl.style.color = info.stable === "Yes" ? "#39d353" : "#ff7b72";
+}
+algoSel.onchange = updateAlgoInfo;
+
+// ── Helper ────────────────────────────────────────────────────────────────────
+function getDelay() { return parseInt(speedSel.value); }
+
 function resetStats() {
   cmp = 0; swp = 0;
   sCmp.textContent = "0";
@@ -278,362 +450,267 @@ function resetStats() {
   sTime.textContent = "0.00s";
 }
 
-// ── Update stat display ───────────────────────────────────────────────────────
 function updateStats() {
   sCmp.textContent = cmp.toLocaleString();
   sSwp.textContent = swp.toLocaleString();
 }
 
-// ── Generate a new random array ───────────────────────────────────────────────
+// ── Array generators ──────────────────────────────────────────────────────────
 function generateArray() {
-  const n = parseInt(sizeInput.value);
-  arr = [];
-  for (let i = 0; i < n; i++) {
-    arr.push(Math.floor(Math.random() * 85) + 10); // values 10–94
+  const n    = parseInt(sizeInput.value);
+  const type = arrType.value;
+
+  // Build base array of values 10–94
+  arr = Array.from({ length: n }, (_, i) =>
+    Math.floor(Math.random() * 85) + 10
+  );
+
+  if (type === "reversed") {
+    arr.sort((a, b) => b - a);
+  } else if (type === "nearly") {
+    arr.sort((a, b) => a - b);
+    // Swap ~10% of elements randomly to make it "nearly sorted"
+    const swaps = Math.max(1, Math.floor(n * 0.1));
+    for (let s = 0; s < swaps; s++) {
+      const i = Math.floor(Math.random() * n);
+      const j = Math.floor(Math.random() * n);
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+  } else if (type === "few") {
+    // Only 3-4 unique values, repeated
+    const uniq = [20, 45, 70, 90];
+    arr = Array.from({ length: n }, () => uniq[Math.floor(Math.random() * uniq.length)]);
   }
+
   drawBars({});
   resetStats();
-  statusBar.textContent = "Ready — " + n + " elements generated. Press Start.";
+  statusBar.textContent = n + " elements — " + arrType.options[arrType.selectedIndex].text + ". Press Start.";
 }
 
-// ── Draw bars on screen ───────────────────────────────────────────────────────
-// states = { index: "compare" | "swap" | "sorted" | "pivot" | "idle" }
+// ── Draw bars ─────────────────────────────────────────────────────────────────
 function drawBars(states) {
-  const n = arr.length;
-  const maxVal = Math.max(...arr, 1);
-  const areaH = vizArea.clientHeight - 10;
+  const n     = arr.length;
+  const maxV  = Math.max(...arr, 1);
+  const areaH = vizArea.clientHeight - 20;
+  const showLabels = n <= 15;
 
-  // Rebuild bars only if count changed
   if (vizArea.children.length !== n) {
     vizArea.innerHTML = "";
+    vizArea.classList.toggle("show-labels", showLabels);
     for (let i = 0; i < n; i++) {
+      const wrap = document.createElement("div");
+      wrap.className = "bar-wrap";
+      wrap.id = "wrap" + i;
+
+      const lbl = document.createElement("div");
+      lbl.className = "bar-label";
+      lbl.id = "lbl" + i;
+
       const b = document.createElement("div");
       b.className = "bar idle";
       b.id = "bar" + i;
-      vizArea.appendChild(b);
+
+      wrap.appendChild(lbl);
+      wrap.appendChild(b);
+      vizArea.appendChild(wrap);
     }
   }
 
-  // Update height and color of each bar
   for (let i = 0; i < n; i++) {
-    const b = document.getElementById("bar" + i);
+    const b   = document.getElementById("bar" + i);
+    const lbl = document.getElementById("lbl" + i);
     if (!b) continue;
-    const h = Math.max(4, Math.floor((arr[i] / maxVal) * areaH));
+    const h = Math.max(4, Math.floor((arr[i] / maxV) * areaH));
     b.style.height = h + "px";
     b.className = "bar " + (states[i] || "idle");
+    if (lbl) lbl.textContent = arr[i];
   }
 }
 
-// ── Sleep: pause execution for delay ms ───────────────────────────────────────
-// Throws "STOP" if user clicked Stop
+// ── Sleep / mark ──────────────────────────────────────────────────────────────
 function sleep() {
   if (stopFlag) throw "STOP";
   return new Promise(resolve => setTimeout(resolve, getDelay()));
 }
 
-// ── Mark state and redraw ─────────────────────────────────────────────────────
-async function mark(states) {
+async function mark(states, sound = null) {
   if (stopFlag) throw "STOP";
   drawBars(states);
   updateStats();
+  if (sound === "compare") playBeep(440 + (arr[Object.keys(states)[0]] || 0) * 2);
+  if (sound === "swap")    playBeep(220, "square", 0.05);
   await sleep();
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// SORTING ALGORITHMS
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Sorting algorithms ────────────────────────────────────────────────────────
 
-// ── 1. Bubble Sort ────────────────────────────────────────────────────────────
-// Compare adjacent elements, swap if out of order. Repeat n times.
 async function bubbleSort() {
-  const n = arr.length;
-  const st = {};
-
+  const n = arr.length; const st = {};
   for (let i = 0; i < n; i++) {
     for (let j = 0; j < n - i - 1; j++) {
-
-      // Compare arr[j] and arr[j+1]
       cmp++;
-      st[j] = "compare";
-      st[j + 1] = "compare";
-      await mark(st);
-
-      if (arr[j] > arr[j + 1]) {
-        // Swap them
-        [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
-        swp++;
-        st[j] = "swap";
-        st[j + 1] = "swap";
-        await mark(st);
+      st[j] = "compare"; st[j+1] = "compare";
+      await mark(st, "compare");
+      if (arr[j] > arr[j+1]) {
+        [arr[j], arr[j+1]] = [arr[j+1], arr[j]]; swp++;
+        st[j] = "swap"; st[j+1] = "swap";
+        await mark(st, "swap");
       }
-
-      delete st[j];
-      delete st[j + 1];
+      delete st[j]; delete st[j+1];
     }
-    // Largest element is now in its correct position
-    st[n - i - 1] = "sorted";
+    st[n-i-1] = "sorted";
   }
-
   return st;
 }
 
-// ── 2. Selection Sort ─────────────────────────────────────────────────────────
-// Find the minimum element in the unsorted part, place it at the front.
 async function selectionSort() {
-  const n = arr.length;
-  const st = {};
-
+  const n = arr.length; const st = {};
   for (let i = 0; i < n; i++) {
-    let minIdx = i;
-    st[minIdx] = "pivot"; // mark current minimum
-
-    for (let j = i + 1; j < n; j++) {
-      cmp++;
-      st[j] = "compare";
-      await mark(st);
-
+    let minIdx = i; st[minIdx] = "pivot";
+    for (let j = i+1; j < n; j++) {
+      cmp++; st[j] = "compare"; await mark(st, "compare");
       if (arr[j] < arr[minIdx]) {
         if (minIdx !== i) delete st[minIdx];
-        minIdx = j;
-        st[minIdx] = "pivot";
-      } else {
-        delete st[j];
-      }
+        minIdx = j; st[minIdx] = "pivot";
+      } else { delete st[j]; }
     }
-
-    // Swap minimum to correct position
     if (minIdx !== i) {
-      [arr[i], arr[minIdx]] = [arr[minIdx], arr[i]];
-      swp++;
-      delete st[minIdx];
-      st[i] = "swap";
-      await mark(st);
+      [arr[i], arr[minIdx]] = [arr[minIdx], arr[i]]; swp++;
+      delete st[minIdx]; st[i] = "swap";
+      await mark(st, "swap");
     }
-
-    st[i] = "sorted";
-    await mark(st);
+    st[i] = "sorted"; await mark(st);
   }
-
   return st;
 }
 
-// ── 3. Insertion Sort ─────────────────────────────────────────────────────────
-// Pick each element and insert it in the correct position in the sorted part.
 async function insertionSort() {
-  const n = arr.length;
-  const st = { 0: "sorted" };
-
+  const n = arr.length; const st = { 0: "sorted" };
   for (let i = 1; i < n; i++) {
-    let key = arr[i];
-    let j = i - 1;
-
-    st[i] = "compare";
-    await mark(st);
-
-    // Shift elements that are greater than key one position right
+    let key = arr[i], j = i-1;
+    st[i] = "compare"; await mark(st, "compare");
     while (j >= 0 && arr[j] > key) {
-      cmp++;
-      arr[j + 1] = arr[j];
-      swp++;
-      st[j + 1] = "swap";
-      st[j] = "compare";
-      await mark(st);
-      delete st[j + 1];
-      j--;
+      cmp++; arr[j+1] = arr[j]; swp++;
+      st[j+1] = "swap"; st[j] = "compare";
+      await mark(st, "swap");
+      delete st[j+1]; j--;
     }
-
-    // Place key in its correct position
-    arr[j + 1] = key;
-    st[j + 1] = "sorted";
-    delete st[i];
+    arr[j+1] = key; st[j+1] = "sorted"; delete st[i];
     await mark(st);
   }
-
   return st;
 }
 
-// ── 4. Merge Sort ─────────────────────────────────────────────────────────────
-// Divide array into halves, sort each half, then merge them back together.
-async function mergeSort(left, right, st) {
-  if (left >= right) return;
-
-  const mid = Math.floor((left + right) / 2);
-  await mergeSort(left, mid, st);       // sort left half
-  await mergeSort(mid + 1, right, st);  // sort right half
-  await mergeParts(left, mid, right, st); // merge both halves
+async function mergeSort(l, r, st) {
+  if (l >= r) return;
+  const m = Math.floor((l+r)/2);
+  await mergeSort(l, m, st);
+  await mergeSort(m+1, r, st);
+  await mergeParts(l, m, r, st);
+}
+async function mergeParts(l, m, r, st) {
+  const La = arr.slice(l, m+1), Ra = arr.slice(m+1, r+1);
+  let i=0, j=0, k=l;
+  while (i < La.length && j < Ra.length) {
+    cmp++; st[k] = "compare"; await mark(st, "compare");
+    arr[k] = La[i] <= Ra[j] ? La[i++] : Ra[j++]; swp++;
+    st[k] = "sorted"; k++;
+  }
+  while (i < La.length) { arr[k]=La[i++]; swp++; st[k]="sorted"; await mark(st); k++; }
+  while (j < Ra.length) { arr[k]=Ra[j++]; swp++; st[k]="sorted"; await mark(st); k++; }
 }
 
-async function mergeParts(left, mid, right, st) {
-  const leftArr = arr.slice(left, mid + 1);
-  const rightArr = arr.slice(mid + 1, right + 1);
-  let i = 0, j = 0, k = left;
-
-  while (i < leftArr.length && j < rightArr.length) {
-    cmp++;
-    st[k] = "compare";
-    await mark(st);
-
-    if (leftArr[i] <= rightArr[j]) {
-      arr[k] = leftArr[i++];
-    } else {
-      arr[k] = rightArr[j++];
-    }
-    swp++;
-    st[k] = "sorted";
-    k++;
-  }
-
-  // Copy remaining elements
-  while (i < leftArr.length) {
-    arr[k] = leftArr[i++];
-    swp++;
-    st[k] = "sorted";
-    await mark(st);
-    k++;
-  }
-  while (j < rightArr.length) {
-    arr[k] = rightArr[j++];
-    swp++;
-    st[k] = "sorted";
-    await mark(st);
-    k++;
-  }
-}
-
-// ── 5. Quick Sort ─────────────────────────────────────────────────────────────
-// Pick a pivot, partition array around it, recursively sort each side.
 async function quickSort(lo, hi, st) {
-  if (lo >= hi) {
-    if (lo >= 0 && lo < arr.length) st[lo] = "sorted";
-    return;
-  }
-
-  const pivotIdx = await partition(lo, hi, st);
-  st[pivotIdx] = "sorted";
-  await mark(st);
-
-  await quickSort(lo, pivotIdx - 1, st);
-  await quickSort(pivotIdx + 1, hi, st);
+  if (lo >= hi) { if (lo>=0 && lo<arr.length) st[lo]="sorted"; return; }
+  const pi = await partition(lo, hi, st);
+  st[pi] = "sorted"; await mark(st);
+  await quickSort(lo, pi-1, st);
+  await quickSort(pi+1, hi, st);
 }
-
 async function partition(lo, hi, st) {
-  const pivot = arr[hi];
-  st[hi] = "pivot"; // highlight pivot
-  let i = lo - 1;
-
-  for (let j = lo; j < hi; j++) {
-    cmp++;
-    st[j] = "compare";
-    await mark(st);
-
+  const pivot = arr[hi]; st[hi] = "pivot"; let i = lo-1;
+  for (let j=lo; j<hi; j++) {
+    cmp++; st[j]="compare"; await mark(st, "compare");
     if (arr[j] < pivot) {
-      i++;
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-      swp++;
-      st[i] = "swap";
-      st[j] = "swap";
-      await mark(st);
+      i++; [arr[i],arr[j]]=[arr[j],arr[i]]; swp++;
+      st[i]="swap"; st[j]="swap"; await mark(st, "swap");
       delete st[i];
     }
     delete st[j];
   }
-
-  // Place pivot in correct position
-  [arr[i + 1], arr[hi]] = [arr[hi], arr[i + 1]];
-  swp++;
-  delete st[hi];
-  return i + 1;
+  [arr[i+1], arr[hi]] = [arr[hi], arr[i+1]]; swp++;
+  delete st[hi]; return i+1;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// BUTTON HANDLERS
-// ─────────────────────────────────────────────────────────────────────────────
-
-btnStart.onclick = async () => {
-  // If already running, act as Stop button
-  if (running) {
-    stopFlag = true;
-    return;
-  }
-
-  // Generate array if empty
+// ── Button handlers ───────────────────────────────────────────────────────────
+async function startSort() {
+  if (running) { stopFlag = true; return; }
   if (arr.length === 0) generateArray();
 
-  // Setup
-  stopFlag = false;
-  running = true;
+  stopFlag = false; running = true;
   btnStart.textContent = "■ Stop";
   btnReset.disabled = true;
   sizeInput.disabled = true;
   algoSel.disabled = true;
+  arrType.disabled = true;
   resetStats();
 
-  // Start timer
   startTime = Date.now();
   timerID = setInterval(() => {
     sTime.textContent = ((Date.now() - startTime) / 1000).toFixed(2) + "s";
   }, 100);
 
-  const key = algoSel.value;
-  const name = algoSel.options[algoSel.selectedIndex].text;
+  const key  = algoSel.value;
+  const name = ALGO_INFO[key].name;
   statusBar.textContent = "Running " + name + "...";
 
   try {
     let finalStates = {};
-
     if (key === "bubble")    finalStates = await bubbleSort();
     if (key === "selection") finalStates = await selectionSort();
     if (key === "insertion") finalStates = await insertionSort();
-    if (key === "merge") {
-      const s = {};
-      await mergeSort(0, arr.length - 1, s);
-      finalStates = s;
-    }
-    if (key === "quick") {
-      const s = {};
-      await quickSort(0, arr.length - 1, s);
-      finalStates = s;
-    }
+    if (key === "merge")  { const s={}; await mergeSort(0, arr.length-1, s); finalStates=s; }
+    if (key === "quick")  { const s={}; await quickSort(0, arr.length-1, s); finalStates=s; }
 
-    // Mark all bars as sorted at the end
     const allSorted = {};
-    for (let i = 0; i < arr.length; i++) allSorted[i] = "sorted";
+    for (let i=0; i<arr.length; i++) allSorted[i]="sorted";
     drawBars(allSorted);
+    playBeep(880, "sine", 0.2);
 
     clearInterval(timerID);
-    const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
-    statusBar.textContent =
-      "Done! " + name + " finished in " + elapsed + "s | " +
-      cmp.toLocaleString() + " comparisons | " +
-      swp.toLocaleString() + " swaps";
+    const elapsed = ((Date.now()-startTime)/1000).toFixed(2);
+    statusBar.textContent = "Done! " + name + " — " + elapsed + "s | " +
+      cmp.toLocaleString() + " comparisons | " + swp.toLocaleString() + " swaps";
 
-  } catch (e) {
-    // User clicked Stop
+  } catch(e) {
     clearInterval(timerID);
     drawBars({});
-    statusBar.textContent = "Stopped by user.";
-
+    statusBar.textContent = "Stopped.";
   } finally {
-    // Restore controls
-    running = false;
-    stopFlag = false;
+    running=false; stopFlag=false;
     btnStart.textContent = "▶ Start";
     btnReset.disabled = false;
     sizeInput.disabled = false;
     algoSel.disabled = false;
+    arrType.disabled = false;
   }
-};
+}
 
-btnReset.onclick = () => {
-  if (!running) generateArray();
-};
+btnStart.onclick = startSort;
+btnReset.onclick = () => { if (!running) generateArray(); };
+sizeInput.oninput = () => { sizeVal.textContent = sizeInput.value; if (!running) generateArray(); };
+arrType.onchange  = () => { if (!running) generateArray(); };
 
-sizeInput.oninput = () => {
-  sizeVal.textContent = sizeInput.value;
-  if (!running) generateArray();
-};
+// ── Spacebar shortcut ─────────────────────────────────────────────────────────
+document.addEventListener("keydown", e => {
+  if (e.code === "Space" && e.target === document.body) {
+    e.preventDefault();
+    startSort();
+  }
+});
 
-// ── Init: generate array on page load ─────────────────────────────────────────
+// ── Init ──────────────────────────────────────────────────────────────────────
+updateAlgoInfo();
 generateArray();
 </script>
 </body>
